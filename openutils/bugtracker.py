@@ -3,10 +3,13 @@ import re
 import shelve
 import xmlrpc.client
 from pathlib import Path
+from urllib.request import urlretrieve
 
 ARTIFACTS = Path(__file__).parent / "handlers" / "bugtracker"
 if not ARTIFACTS.exists():
     ARTIFACTS.mkdir()
+
+DOWNLOAD_URL = "https://bugs.python.org/issue?@action=export_csv&@columns=id,activity,title,creator,assignee,status,type&@sort=-activity&@filter=status&@pagesize=50&@startwith=0&status=-1,1,2,3"
 
 
 class BPOTransformer(xmlrpc.client.SafeTransport):
@@ -38,7 +41,15 @@ def filter_issues(query):
                 yield row
 
 
+def refresh_data():
+    print("Refreshing the data...")
+    urlretrieve(DOWNLOAD_URL, ARTIFACTS / "all_issues.csv")
+    print("Data updated successfully")
+
+
 def handler(query, extra=None):
+    if extra is not None and "refresh" in extra:
+        refresh_data()
     issues = filter_issues(query)
     issue_shelf = shelve.open(str(ARTIFACTS / "issues.db"), writeback=True)
     proxy = get_xml_rpc_proxy()
