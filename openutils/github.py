@@ -120,7 +120,7 @@ def handler(query, extra=None):
         for query_file in query_files:
             for result_file in result["files"]:
                 if exact and query_file == result_file:
-                    mathces.append(result_file)
+                    matches.append(result_file)
                 if (
                     not exact
                     and query_file.casefold() in result_file.casefold()
