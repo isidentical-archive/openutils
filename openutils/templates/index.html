@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block container %}
+{% if error %}
+<div class="alert alert-primary" role="alert">
+    {{error|safe}}
+</div>
+{% endif %}
+<form action="{{ url_for('query') }}">
+  <div class="form-group">
+    <label for="query">Query</label>
+    <input class="form-control" name="query" id="query">
+    <br>
+    <label for="type">Platform</label>
+    <select class="form-control" name="type" id="type">
+      <option value="bpo">bugs.python.org</option>
+      <option value="pr">python/cpython PRs (by file)</option>
+    </select>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+{% endblock %}
