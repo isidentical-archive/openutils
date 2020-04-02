@@ -15,6 +15,12 @@ GITHUB = GitHub(APP)
 
 @APP.route("/")
 def index():
+    if (authorization := session.get("authorization")) is not None:
+        if authorization:
+            error = "Successfully logged in!"
+        else:
+            error = "Couldn't logged in!"
+
     return render_template("index.html", error=None)
 
 
@@ -50,13 +56,22 @@ def github_login():
     return GITHUB.authorize(scope="user")
 
 
+@APP.route("/github/logout")
+def github_logout():
+    session["authorization"] = None
+    session["github_access_token"] = None
+
+
 @APP.route("/github/callback")
 @GITHUB.authorized_handler
 def authorized(oauth_token):
     next_url = request.args.get("next") or url_for("index")
     if oauth_token is None:
         print("Authorization failed.")
+        session["authorization"] = False
         return redirect(next_url)
+
+    session["authorization"] = True
     session["github_access_token"] = oauth_token
     return redirect(next_url)
 
