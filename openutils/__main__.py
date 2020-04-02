@@ -1,4 +1,5 @@
 import os
+import secrets
 from argparse import ArgumentParser
 
 from openutils.views import APP
@@ -16,7 +17,7 @@ def main():
         "-d", "--debug", help="Debug mode on/of", default=False, type=bool
     )
     server = parser.parse_args()
-    APP.secret_key = os.getenv("FLASK_SECRET_KEY")
+    APP.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_urlsafe(64))
     APP.run(server.host, server.port, server.debug)
 
 
