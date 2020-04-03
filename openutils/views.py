@@ -12,6 +12,8 @@ APP.config["GITHUB_CLIENT_ID"] = os.getenv("GITHUB_CLIENT_ID")
 APP.config["GITHUB_CLIENT_SECRET"] = os.getenv("GITHUB_CLIENT_SECRET")
 GITHUB = GitHub(APP)
 
+CIS = ("PyFlakes",)
+
 
 @APP.route("/")
 def index():
@@ -32,13 +34,14 @@ def query():
     ):
         return render_template("index.html", error="Fill the required fields")
 
-    query = request.args["query"]
-    platform = request.args["type"]
-    extra = request.args.get("extra", None)
+    extra = dict(request.args)
+    query = extra.pop("query")
+    platform = extra.pop("type")
     if handler := HANDLERS.get(platform):
         try:
             return render_template(
-                "results.html", results=tuple(handler(query, extra=extra))
+                "results.html",
+                results=tuple(handler(query, session, extra=extra)),
             )
         except Exception as e:
             return render_template(
@@ -60,6 +63,7 @@ def github_login():
 def github_logout():
     session["authorization"] = None
     session["github_access_token"] = None
+    return redirect("/")
 
 
 @APP.route("/github/callback")
@@ -74,9 +78,3 @@ def authorized(oauth_token):
     session["authorization"] = True
     session["github_access_token"] = oauth_token
     return redirect(next_url)
-
-
-@GITHUB.access_token_getter
-def token_getter():
-    if "github_access_token" in session:
-        return session["github_access_token"]

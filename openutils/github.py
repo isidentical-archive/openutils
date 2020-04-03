@@ -56,6 +56,7 @@ def valid_data(data):
 
 
 def get_fresh_data(token):
+    print("Refreshing the data")
     after = ""
     results = []
     while len(results) == 0 or valid_data(results[-1]):
@@ -65,10 +66,11 @@ def get_fresh_data(token):
             ]["endCursor"]
             after = ' after: "%s",' % end
 
-        results.append(send_query(QUERY % after), token)
+        results.append(send_query(QUERY % after, token))
         print(f"Crawling the {len(results)}th page.")
 
     results.pop()
+    print("Data refreshed")
     return results
 
 
@@ -97,9 +99,9 @@ def get_prs():
         yield from json.load(cache)
 
 
-def handler(query, extra=None):
-    if extra is not None:
-        results = get_fresh_data(extra)
+def handler(query, session, extra):
+    if extra.get("refresh") and session.get("authorization"):
+        results = get_fresh_data(os.getenv("GITHUB_TOKEN"))
         dump_results(results)
 
     max_files = float("inf")

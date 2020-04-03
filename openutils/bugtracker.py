@@ -1,6 +1,7 @@
 import csv
 import re
 import shelve
+import time
 import xmlrpc.client
 from pathlib import Path
 from urllib.request import urlretrieve
@@ -9,7 +10,11 @@ ARTIFACTS = Path(__file__).parent / "handlers" / "bugtracker"
 if not ARTIFACTS.exists():
     ARTIFACTS.mkdir()
 
-DOWNLOAD_URL = "https://bugs.python.org/issue?@action=export_csv&@columns=id,activity,title,creator,assignee,status,type&@sort=-activity&@filter=status&@pagesize=50&@startwith=0&status=-1,1,2,3"
+DOWNLOAD_URL = (
+    "https://bugs.python.org/issue?@action=export_csv&@columns=i"
+    "d,activity,title,creator,assignee,status,type&@sort=-activi"
+    "ty&@filter=status&@pagesize=50&@startwith=0&status=-1,1,2,3"
+)
 
 
 class BPOTransformer(xmlrpc.client.SafeTransport):
@@ -35,6 +40,8 @@ def filter_issues(query):
     with open(ARTIFACTS / "all_issues.csv") as issues:
         reader = csv.DictReader(issues)
         for row in reader:
+            if "unterminated" in row["title"]:
+                breakpoint()
             if row["status"] != "1":
                 continue
             if query.search(row["title"]):
@@ -47,8 +54,13 @@ def refresh_data():
     print("Data updated successfully")
 
 
-def handler(query, extra=None):
-    if extra is not None and "refresh" in extra:
+def handler(query, session, extra):
+    if (
+        extra.get("refresh")
+        and session.get("authorization")
+        and (ARTIFACTS / "all_issues.csv").stat().st_mtime + 60 * 60 * 6
+        < time.time()
+    ):
         refresh_data()
     issues = filter_issues(query)
     issue_shelf = shelve.open(str(ARTIFACTS / "issues.db"), writeback=True)

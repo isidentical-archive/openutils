@@ -31,9 +31,9 @@
             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
           </li>
         </ul>
-      {% if session.get("authorized") %}
-      <form class="form-inline mt-2 mt-md-0" action="{{ url_for('logout') }}">
-        <button class="btn btn-failure my-2 my-sm-0" type="submit">Logout</button>
+      {% if session.get("authorization") %}
+      <form class="form-inline mt-2 mt-md-0" action="{{ url_for('github_logout') }}">
+        <button class="btn btn-success my-2 my-sm-0" type="submit">Logout</button>
       </form>
       {% else %}
       <form class="form-inline mt-2 mt-md-0" action="{{ url_for('github_login') }}">
@@ -44,8 +44,6 @@
     </nav>
 
     <main role="main" class="container">
-        {{ session.get("authorized") }}
-        {{ session.get("github_access_token") }}
         {% block container %}{% endblock %}
     </main>
     <footer>

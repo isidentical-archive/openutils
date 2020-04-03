@@ -19,4 +19,9 @@
     <button type="submit" class="btn btn-primary">Submit</button>
   </div>
 </form>
+<div class="border border-primary">
+    {% for project in ciprojects %}
+    <img src="https://github.com/isidentical/pyastci/workflows/{{project}}/badge.svg" alt="{{project}}">
+    {% endfor %}
+</div>
 {% endblock %}
