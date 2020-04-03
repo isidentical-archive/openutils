@@ -23,7 +23,7 @@ def index():
         else:
             error = "Couldn't logged in!"
 
-    return render_template("index.html", error=None)
+    return render_template("index.html", error=None, ciprojects=CIS)
 
 
 @APP.route("/query")
@@ -50,7 +50,9 @@ def query():
             )
     else:
         return render_template(
-            "index.html", error="Please select a valid platform"
+            "index.html",
+            error="Please select a valid platform",
+            ciprojects=CIS,
         )
 
 

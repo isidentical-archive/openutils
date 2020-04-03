@@ -19,9 +19,9 @@
     <button type="submit" class="btn btn-primary">Submit</button>
   </div>
 </form>
-<div class="border border-primary">
+<div class="row align-items-center justify-content-center border border-primary" style="padding: 5rem;">
     {% for project in ciprojects %}
-    <img src="https://github.com/isidentical/pyastci/workflows/{{project}}/badge.svg" alt="{{project}}">
+    <a href="https://github.com/isidentical/pyastci"><img src="https://github.com/isidentical/pyastci/workflows/{{project}}/badge.svg" alt="{{project}}" width="400rem" height="75rem"></a>
     {% endfor %}
 </div>
 {% endblock %}
