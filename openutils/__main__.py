@@ -17,8 +17,6 @@ def main():
         "-d", "--debug", help="Debug mode on/of", default=False, type=bool
     )
     server = parser.parse_args()
-    APP.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_urlsafe(64))
-    APP.config["SESSION_TYPE"] = "filesystem"
     APP.run(server.host, server.port, server.debug)
 
 

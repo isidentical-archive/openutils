@@ -1,5 +1,8 @@
+import json
 import os
+import secrets
 import traceback
+from urllib.request import Request, urlopen
 
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask_github import GitHub
@@ -8,15 +11,36 @@ from openutils.handlers import HANDLERS
 
 APP = Flask(__name__)
 
+APP.config["SESSION_TYPE"] = "filesystem"
 APP.config["GITHUB_CLIENT_ID"] = os.getenv("GITHUB_CLIENT_ID")
 APP.config["GITHUB_CLIENT_SECRET"] = os.getenv("GITHUB_CLIENT_SECRET")
+APP.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_urlsafe(64))
+
 GITHUB = GitHub(APP)
 
-CIS = ("PyFlakes",)
+WORKFLOWS = (
+    "https://api.github.com/repos/isidentical/pyastci/actions/workflows"
+)
+
+
+def get_fresh_cis():
+    request = Request(WORKFLOWS)
+    request.add_header("Authorization", "token %s" % os.getenv("GITHUB_TOKEN"))
+    with urlopen(WORKFLOWS) as page:
+        content = json.load(page)
+    for workflow in content["workflows"]:
+        yield workflow["name"]
+
+
+CIS = list(get_fresh_cis())
 
 
 @APP.route("/")
 def index():
+    if request.args.get("refresh") and session.get("authorization"):
+        global CIS
+        CIS = get_fresh_cis()
+
     if (authorization := session.get("authorization")) is not None:
         if authorization:
             error = "Successfully logged in!"
