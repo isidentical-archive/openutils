@@ -40,8 +40,6 @@ def filter_issues(query):
     with open(ARTIFACTS / "all_issues.csv") as issues:
         reader = csv.DictReader(issues)
         for row in reader:
-            if "unterminated" in row["title"]:
-                breakpoint()
             if row["status"] != "1":
                 continue
             if query.search(row["title"]):
